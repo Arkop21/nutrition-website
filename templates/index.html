@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>AI Nutritionist</title>
+<title>AI Nutritionist Pro</title>
 
-<!-- Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
@@ -16,48 +15,54 @@
 }
 
 body {
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    background: linear-gradient(135deg, #141e30, #243b55);
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     color: white;
+    transition: 0.3s;
 }
 
-/* Glass Container */
+.dark {
+    background: linear-gradient(135deg, #000000, #434343);
+}
+
 .container {
-    backdrop-filter: blur(20px);
+    width: 900px;
+    backdrop-filter: blur(25px);
     background: rgba(255,255,255,0.08);
-    border-radius: 20px;
+    border-radius: 25px;
     padding: 30px;
-    width: 420px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
 }
 
-/* Title */
+/* LEFT SIDE */
+.form-box {
+    display: flex;
+    flex-direction: column;
+}
+
 h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    font-weight: 600;
+    margin-bottom: 15px;
 }
 
-/* Inputs */
 input, select {
     width: 100%;
     padding: 10px;
-    margin-top: 8px;
-    margin-bottom: 15px;
-    border: none;
+    margin: 8px 0 12px;
     border-radius: 10px;
+    border: none;
     outline: none;
 }
 
-/* Button */
 button {
-    width: 100%;
     padding: 12px;
-    border: none;
     border-radius: 12px;
+    border: none;
     background: linear-gradient(135deg, #00c6ff, #0072ff);
     color: white;
     font-size: 16px;
@@ -69,64 +74,103 @@ button:hover {
     transform: scale(1.05);
 }
 
-/* Results */
-.results {
-    margin-top: 20px;
-    padding: 15px;
-    border-radius: 15px;
-    background: rgba(0,0,0,0.3);
+/* RIGHT SIDE */
+.output-box {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-.ai-box {
-    margin-top: 15px;
+/* Cards */
+.card {
+    background: rgba(0,0,0,0.4);
     padding: 15px;
     border-radius: 15px;
-    background: rgba(0,0,0,0.5);
+}
+
+/* Progress bars */
+.bar {
+    height: 10px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.2);
+    margin-top: 5px;
+}
+
+.fill {
+    height: 100%;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #00c6ff, #0072ff);
+}
+
+/* AI Chat box */
+.ai-box {
+    background: rgba(0,0,0,0.6);
+    padding: 15px;
+    border-radius: 15px;
+    max-height: 250px;
+    overflow-y: auto;
     white-space: pre-wrap;
 }
-</style>
 
+/* Toggle */
+.toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.2);
+}
+
+/* Responsive */
+@media(max-width: 900px) {
+    .container {
+        grid-template-columns: 1fr;
+        width: 95%;
+    }
+}
+</style>
 </head>
+
 <body>
+
+<div class="toggle" onclick="toggleMode()">🌙 Toggle</div>
 
 <div class="container">
 
-    <h1>💪 AI Diet Planner</h1>
+<!-- LEFT -->
+<div class="form-box">
+    <h1>💪 AI Fitness Pro</h1>
 
     <form method="POST">
 
-        <label>Age</label>
-        <input type="number" name="age" required>
+        <input type="number" name="age" placeholder="Age" required>
 
-        <label>Weight</label>
-        <input type="number" step="any" name="weight" required>
+        <input type="number" step="any" name="weight" placeholder="Weight" required>
         <select name="weight_unit">
             <option value="kg">kg</option>
             <option value="pounds">pounds</option>
         </select>
 
-        <label>Height</label>
-        <input type="number" step="any" name="height" required>
+        <input type="number" step="any" name="height" placeholder="Height" required>
         <select name="height_unit">
             <option value="cm">cm</option>
             <option value="feet">feet</option>
             <option value="m">meters</option>
         </select>
 
-        <label>Gender</label>
         <select name="gender">
             <option>Male</option>
             <option>Female</option>
         </select>
 
-        <label>Activity</label>
         <select name="activity">
             <option>Lazy</option>
             <option>Normal</option>
             <option>Active</option>
         </select>
 
-        <label>Goal</label>
         <select name="goal">
             <option value="weight_loss">Weight Loss</option>
             <option value="weight_gain">Weight Gain</option>
@@ -135,27 +179,48 @@ button:hover {
 
         <button type="submit">⚡ Generate Plan</button>
     </form>
+</div>
 
-    {% if BMI %}
-    <div class="results">
-        <h3>📊 Your Stats</h3>
-        <p><b>BMI:</b> {{ BMI }}</p>
-        <p><b>Status:</b> {{ status }}</p>
-        <p><b>Calories:</b> {{ calories }}</p>
-        <p><b>Protein:</b> {{ protein }} g</p>
-        <p><b>Fat:</b> {{ fat }} g</p>
-        <p><b>Carbs:</b> {{ carbs }} g</p>
-    </div>
-    {% endif %}
+<!-- RIGHT -->
+<div class="output-box">
 
-    {% if ai_plan %}
-    <div class="ai-box">
-        <h3>🤖 AI Diet Plan</h3>
-        {{ ai_plan }}
-    </div>
-    {% endif %}
+{% if BMI %}
+<div class="card">
+    <h3>📊 Stats</h3>
+    <p>BMI: {{ BMI }}</p>
+    <p>Status: {{ status }}</p>
+    <p>Calories: {{ calories }}</p>
+</div>
+
+<div class="card">
+    <h3>🍗 Macros</h3>
+
+    <p>Protein ({{ protein }}g)</p>
+    <div class="bar"><div class="fill" style="width: {{ protein/2 }}%"></div></div>
+
+    <p>Fat ({{ fat }}g)</p>
+    <div class="bar"><div class="fill" style="width: {{ fat/2 }}%"></div></div>
+
+    <p>Carbs ({{ carbs }}g)</p>
+    <div class="bar"><div class="fill" style="width: {{ carbs/3 }}%"></div></div>
+</div>
+{% endif %}
+
+{% if ai_plan %}
+<div class="ai-box">
+    🤖 {{ ai_plan }}
+</div>
+{% endif %}
 
 </div>
+
+</div>
+
+<script>
+function toggleMode() {
+    document.body.classList.toggle("dark");
+}
+</script>
 
 </body>
 </html>
