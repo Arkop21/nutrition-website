@@ -1,0 +1,14 @@
+<h2>Your Results</h2>
+
+<p>BMI: {{ bmi }} ({{ r_bmi }})</p>
+<p>BMR: {{ bmr }}</p>
+<p>TDEE: {{ tdee }}</p>
+<p>Calories: {{ cal }}</p>
+<p>Protein: {{ prot }}</p>
+<p>Fat: {{ fat }}</p>
+<p>Carbs: {{ carbs }}</p>
+
+<h3>Diet Plan</h3>
+<pre>{{ diet }}</pre>
+
+<a href="/">Go Back</a>
