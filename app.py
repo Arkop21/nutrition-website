@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 import requests
 import os
+import json
 
 app = Flask(__name__)
 
@@ -45,7 +46,7 @@ def calculate(age, weight_kg, cm_height, gender, activity, goal):
     Fat = (Cal * 0.25) / 9
     Carbs = (Cal - (Prot * 4 + (Cal * 0.25))) / 4
 
-    return BMI, status, BMR, TDEE, Cal, Prot, Fat, Carbs
+    return BMI, status, Cal, Prot, Fat, Carbs
 
 
 # ---------------- AI FUNCTION ----------------
@@ -55,7 +56,7 @@ def generate_ai_plan(BMI, goal, Cal, Prot, Fat, Carbs):
     api_key = os.getenv("GROQ_API_KEY")
 
     if not api_key:
-        return "❌ ERROR: Set GROQ_API_KEY first"
+        return "❌ Set GROQ_API_KEY first"
 
     url = "https://api.groq.com/openai/v1/chat/completions"
 
@@ -65,7 +66,7 @@ def generate_ai_plan(BMI, goal, Cal, Prot, Fat, Carbs):
     }
 
     data = {
-        "model": "llama3-8b-8192",
+        "model": "llama-3.1-8b-instant",  # ✅ FIXED MODEL
         "messages": [
             {
                 "role": "user",
@@ -79,7 +80,7 @@ Protein: {Prot}
 Fat: {Fat}
 Carbs: {Carbs}
 
-Keep it practical (roti, rice, eggs, chicken, etc).
+Keep it short, practical, and structured (breakfast, lunch, dinner).
 """
             }
         ]
@@ -96,7 +97,7 @@ Keep it practical (roti, rice, eggs, chicken, etc).
         return result["choices"][0]["message"]["content"]
 
     except Exception as e:
-        return f"❌ Exception: {str(e)}"
+        return f"❌ ERROR: {str(e)}"
 
 
 # ---------------- ROUTE ----------------
@@ -125,11 +126,17 @@ def home():
         elif height_unit == "m":
             height = height * 100
 
-        BMI, status, BMR, TDEE, Cal, Prot, Fat, Carbs = calculate(
+        BMI, status, Cal, Prot, Fat, Carbs = calculate(
             age, weight, height, gender, activity, goal
         )
 
         ai_plan = generate_ai_plan(BMI, goal, Cal, Prot, Fat, Carbs)
+
+        chart_data = json.dumps({
+            "protein": Prot,
+            "fat": Fat,
+            "carbs": Carbs
+        })
 
         return render_template("index.html",
                                BMI=round(BMI,2),
@@ -138,7 +145,8 @@ def home():
                                protein=round(Prot,1),
                                fat=round(Fat,1),
                                carbs=round(Carbs,1),
-                               ai_plan=ai_plan)
+                               ai_plan=ai_plan,
+                               chart_data=chart_data)
 
     return render_template("index.html")
 
