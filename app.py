@@ -48,29 +48,16 @@ def calculate(age, weight_kg, cm_height, gender, activity, goal):
     return BMI, status, BMR, TDEE, Cal, Prot, Fat, Carbs
 
 
-# ---------------- FREE AI (GROQ) ----------------
+# ---------------- AI FUNCTION ----------------
 
 def generate_ai_plan(BMI, goal, Cal, Prot, Fat, Carbs):
 
     api_key = os.getenv("GROQ_API_KEY")
 
     if not api_key:
-        return "AI not configured. Please set GROQ_API_KEY."
+        return "ERROR: Missing API key"
 
-    prompt = f"""
-You are a nutrition expert.
-
-Create a simple Pakistani diet plan.
-
-BMI: {BMI}
-Goal: {goal}
-Calories: {Cal}
-Protein: {Prot}
-Fat: {Fat}
-Carbs: {Carbs}
-
-Make it practical and short.
-"""
+    url = "https://api.groq.com/openai/v1/chat/completions"
 
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -80,17 +67,33 @@ Make it practical and short.
     data = {
         "model": "llama3-8b-8192",
         "messages": [
-            {"role": "user", "content": prompt}
+            {
+                "role": "user",
+                "content": f"""
+Create a Pakistani diet plan:
+
+BMI: {BMI}
+Goal: {goal}
+Calories: {Cal}
+Protein: {Prot}
+Fat: {Fat}
+Carbs: {Carbs}
+"""
+            }
         ]
     }
 
-    response = requests.post(
-        "https://api.groq.com/openai/v1/chat/completions",
-        headers=headers,
-        json=data
-    )
+    response = requests.post(url, headers=headers, json=data)
 
-    return response.json()["choices"][0]["message"]["content"]
+    if response.status_code != 200:
+        return f"AI ERROR: {response.text}"
+
+    result = response.json()
+
+    if "choices" not in result:
+        return f"Unexpected response: {result}"
+
+    return result["choices"][0]["message"]["content"]
 
 
 # ---------------- ROUTES ----------------
@@ -122,54 +125,22 @@ def home():
         BMI, status, BMR, TDEE, Cal, Prot, Fat, Carbs = calculate(
             age, weight, height, gender, activity, goal
         )
-def generate_ai_plan(BMI, goal, Cal, Prot, Fat, Carbs):
 
-    import requests
-    import os
+        ai_plan = generate_ai_plan(BMI, goal, Cal, Prot, Fat, Carbs)
 
-    api_key = os.getenv("GROQ_API_KEY")
+        return render_template("index.html",
+                               BMI=BMI,
+                               status=status,
+                               calories=Cal,
+                               protein=Prot,
+                               fat=Fat,
+                               carbs=Carbs,
+                               ai_plan=ai_plan)
 
-    if not api_key:
-        return "ERROR: Missing API key"
+    return render_template("index.html")
 
-    url = "https://api.groq.com/openai/v1/chat/completions"
 
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
+# ---------------- RUN ----------------
 
-    data = {
-        "model": "llama3-8b-8192",
-        "messages": [
-            {
-                "role": "user",
-                "content": f"""
-Create a diet plan:
-
-BMI: {BMI}
-Goal: {goal}
-Calories: {Cal}
-Protein: {Prot}
-Fat: {Fat}
-Carbs: {Carbs}
-"""
-            }
-        ]
-    }
-
-    response = requests.post(url, headers=headers, json=data)
-
-    # 🛡️ SAFE CHECK (IMPORTANT)
-    if response.status_code != 200:
-        return f"AI ERROR: {response.text}"
-
-    result = response.json()
-
-    # extra safety check
-    if "choices" not in result:
-        return f"Unexpected response: {result}"
-
-    return result["choices"][0]["message"]["content"]
-    if __name__ == "__main__":
-        app.run(host="0.0.0.0", port=10000)
+if __name__ == "__main__":
+    app.run(debug=True)
