@@ -55,7 +55,7 @@ def generate_ai_plan(BMI, goal, Cal, Prot, Fat, Carbs):
     api_key = os.getenv("GROQ_API_KEY")
 
     if not api_key:
-        return "ERROR: Missing API key"
+        return "❌ ERROR: Set GROQ_API_KEY first"
 
     url = "https://api.groq.com/openai/v1/chat/completions"
 
@@ -70,7 +70,7 @@ def generate_ai_plan(BMI, goal, Cal, Prot, Fat, Carbs):
             {
                 "role": "user",
                 "content": f"""
-Create a Pakistani diet plan:
+Create a simple Pakistani diet plan.
 
 BMI: {BMI}
 Goal: {goal}
@@ -78,25 +78,28 @@ Calories: {Cal}
 Protein: {Prot}
 Fat: {Fat}
 Carbs: {Carbs}
+
+Keep it practical (roti, rice, eggs, chicken, etc).
 """
             }
         ]
     }
 
-    response = requests.post(url, headers=headers, json=data)
+    try:
+        response = requests.post(url, headers=headers, json=data)
 
-    if response.status_code != 200:
-        return f"AI ERROR: {response.text}"
+        if response.status_code != 200:
+            return f"❌ AI ERROR: {response.text}"
 
-    result = response.json()
+        result = response.json()
 
-    if "choices" not in result:
-        return f"Unexpected response: {result}"
+        return result["choices"][0]["message"]["content"]
 
-    return result["choices"][0]["message"]["content"]
+    except Exception as e:
+        return f"❌ Exception: {str(e)}"
 
 
-# ---------------- ROUTES ----------------
+# ---------------- ROUTE ----------------
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -129,12 +132,12 @@ def home():
         ai_plan = generate_ai_plan(BMI, goal, Cal, Prot, Fat, Carbs)
 
         return render_template("index.html",
-                               BMI=BMI,
+                               BMI=round(BMI,2),
                                status=status,
-                               calories=Cal,
-                               protein=Prot,
-                               fat=Fat,
-                               carbs=Carbs,
+                               calories=round(Cal,0),
+                               protein=round(Prot,1),
+                               fat=round(Fat,1),
+                               carbs=round(Carbs,1),
                                ai_plan=ai_plan)
 
     return render_template("index.html")
