@@ -122,24 +122,52 @@ def home():
         BMI, status, BMR, TDEE, Cal, Prot, Fat, Carbs = calculate(
             age, weight, height, gender, activity, goal
         )
+def generate_ai_plan(BMI, goal, Cal, Prot, Fat, Carbs):
 
-        diet = generate_ai_plan(BMI, goal, Cal, Prot, Fat, Carbs)
+    import requests
+    import os
 
-        return render_template(
-            "result.html",
-            BMI=BMI,
-            status=status,
-            BMR=BMR,
-            TDEE=TDEE,
-            Cal=Cal,
-            Prot=Prot,
-            Fat=Fat,
-            Carbs=Carbs,
-            diet=diet
-        )
+    api_key = os.getenv("GROQ_API_KEY")
 
-    return render_template("index.html")
+    if not api_key:
+        return "ERROR: Missing API key"
 
+    url = "https://api.groq.com/openai/v1/chat/completions"
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "model": "llama3-8b-8192",
+        "messages": [
+            {
+                "role": "user",
+                "content": f"""
+Create a diet plan:
+
+BMI: {BMI}
+Goal: {goal}
+Calories: {Cal}
+Protein: {Prot}
+Fat: {Fat}
+Carbs: {Carbs}
+"""
+            }
+        ]
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+
+    # 🛡️ SAFE CHECK (IMPORTANT)
+    if response.status_code != 200:
+        return f"AI ERROR: {response.text}"
+
+    result = response.json()
+
+    # extra safety check
+    if "choices" not in result:
+        return f"Unexpected response: {result}"
+
+    return result["choices"][0]["message"]["content"]
