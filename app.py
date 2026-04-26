@@ -1,45 +1,37 @@
-from openai import OpenAI
-client=
-OpenAI(api_key="YOUR_API_KEY")
-
-
 from flask import Flask, render_template, request
+import requests
+import os
 
 app = Flask(__name__)
 
-# ---------------- CALCULATION LOGIC ----------------
+# ---------------- CALCULATION ----------------
 
-def calculate_all(age, weight_kg, cm_height, gender, activity_level, goal):
+def calculate(age, weight_kg, cm_height, gender, activity, goal):
 
     m_height = cm_height / 100
-
-    # BMI
     BMI = weight_kg / (m_height ** 2)
 
     if BMI < 18.5:
-        r_BMI = "Underweight"
+        status = "Underweight"
     elif BMI < 25:
-        r_BMI = "Normal"
+        status = "Normal"
     else:
-        r_BMI = "Overweight"
+        status = "Overweight"
 
-    # BMR
     if gender == "Male":
-        r_BMR = 10 * weight_kg + 6.25 * cm_height - 5 * age + 5
+        BMR = 10 * weight_kg + 6.25 * cm_height - 5 * age + 5
     else:
-        r_BMR = 10 * weight_kg + 6.25 * cm_height - 5 * age - 161
+        BMR = 10 * weight_kg + 6.25 * cm_height - 5 * age - 161
 
-    # Activity factor
-    if activity_level == "Lazy":
-        f_activity = 1.2
-    elif activity_level == "Normal":
-        f_activity = 1.375
+    if activity == "Lazy":
+        factor = 1.2
+    elif activity == "Normal":
+        factor = 1.375
     else:
-        f_activity = 1.9
+        factor = 1.9
 
-    TDEE = r_BMR * f_activity
+    TDEE = BMR * factor
 
-    # Goal calories
     if goal == "weight_loss":
         Cal = TDEE - 500
         Prot = weight_kg * 2
@@ -50,36 +42,55 @@ def calculate_all(age, weight_kg, cm_height, gender, activity_level, goal):
         Cal = TDEE
         Prot = weight_kg * 1.4
 
-    Fat_Cal = Cal * 0.25
-    Fat = Fat_Cal / 9
-    Carbs = (Cal - (Prot * 4 + Fat_Cal)) / 4
+    Fat = (Cal * 0.25) / 9
+    Carbs = (Cal - (Prot * 4 + (Cal * 0.25))) / 4
 
-    return BMI, r_BMI, r_BMR, TDEE, Cal, Prot, Fat, Carbs
+    return BMI, status, BMR, TDEE, Cal, Prot, Fat, Carbs
 
 
-# ---------------- DIET PLAN (SIMPLE TEXT) ----------------
+# ---------------- FREE AI (GROQ) ----------------
 
-def generate_diet_plan(Cal, Prot, Fat, Carbs, goal):
+def generate_ai_plan(BMI, goal, Cal, Prot, Fat, Carbs):
 
-    return f"""
-DAILY DIET PLAN
+    api_key = os.getenv("GROQ_API_KEY")
 
-Calories: {Cal:.0f} kcal
-Protein: {Prot:.0f} g
-Fat: {Fat:.0f} g
-Carbs: {Carbs:.0f} g
+    if not api_key:
+        return "AI not configured. Please set GROQ_API_KEY."
 
+    prompt = f"""
+You are a nutrition expert.
+
+Create a simple Pakistani diet plan.
+
+BMI: {BMI}
 Goal: {goal}
+Calories: {Cal}
+Protein: {Prot}
+Fat: {Fat}
+Carbs: {Carbs}
 
-Food Suggestions:
-- Breakfast: Eggs, milk, oats, banana
-- Lunch: Rice, chicken/daal, vegetables
-- Snack: Fruits, yogurt
-- Dinner: Roti, protein source, salad
-
-Drink 2–3 liters of water daily.
-Sleep 7–8 hours.
+Make it practical and short.
 """
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "model": "llama3-8b-8192",
+        "messages": [
+            {"role": "user", "content": prompt}
+        ]
+    }
+
+    response = requests.post(
+        "https://api.groq.com/openai/v1/chat/completions",
+        headers=headers,
+        json=data
+    )
+
+    return response.json()["choices"][0]["message"]["content"]
 
 
 # ---------------- ROUTES ----------------
@@ -91,54 +102,44 @@ def home():
 
         age = int(request.form["age"])
         weight = float(request.form["weight"])
-        weight_unit = request.form["weight_unit"]
         height = float(request.form["height"])
+
+        weight_unit = request.form["weight_unit"]
         height_unit = request.form["height_unit"]
+
         gender = request.form["gender"]
         activity = request.form["activity"]
         goal = request.form["goal"]
 
-        # convert weight
         if weight_unit == "pounds":
-            weight_kg = weight / 2.20462
-        else:
-            weight_kg = weight
+            weight = weight / 2.20462
 
-        # convert height
-        if height_unit == "cm":
-            cm_height = height
-        elif height_unit == "feet":
-            cm_height = height * 30.48
-        else:
-            cm_height = height * 100
+        if height_unit == "feet":
+            height = height * 30.48
+        elif height_unit == "m":
+            height = height * 100
 
-        BMI, r_BMI, r_BMR, TDEE, Cal, Prot, Fat, Carbs = calculate_all(
-            age, weight_kg, cm_height, gender, activity, goal
+        BMI, status, BMR, TDEE, Cal, Prot, Fat, Carbs = calculate(
+            age, weight, height, gender, activity, goal
         )
 
-       def generate_diet_plan(BMI, goal, Cal, Prot, Fat, Carbs):
+        diet = generate_ai_plan(BMI, goal, Cal, Prot, Fat, Carbs)
 
-    prompt = f"""
-You are a professional nutritionist.
+        return render_template(
+            "result.html",
+            BMI=BMI,
+            status=status,
+            BMR=BMR,
+            TDEE=TDEE,
+            Cal=Cal,
+            Prot=Prot,
+            Fat=Fat,
+            Carbs=Carbs,
+            diet=diet
+        )
 
-Create a simple diet plan:
+    return render_template("index.html")
 
-BMI: {BMI}
-Goal: {goal}
-Calories: {Cal}
-Protein: {Prot}
-Fat: {Fat}
-Carbs: {Carbs}
 
-Make it simple and practical for Pakistan food.
-"""
-
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "You are a nutrition expert."},
-            {"role": "user", "content": prompt}
-        ]
-    )
-
-    return response.choices[0].message.content
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
