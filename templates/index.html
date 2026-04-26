@@ -1,214 +1,163 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>AI Nutritionist Pro</title>
+<title>AI Fitness Pro</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
-}
-
 body {
-    background: linear-gradient(135deg, #141e30, #243b55);
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    transition: 0.3s;
-}
-
-.dark {
-    background: linear-gradient(135deg, #000000, #434343);
+    margin:0;
+    font-family: Arial;
+    background:#0f172a;
+    color:white;
 }
 
 .container {
-    width: 900px;
-    backdrop-filter: blur(25px);
-    background: rgba(255,255,255,0.08);
-    border-radius: 25px;
-    padding: 30px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 25px;
+    display:grid;
+    grid-template-columns: 350px 1fr;
+    height:100vh;
 }
 
-/* LEFT SIDE */
-.form-box {
-    display: flex;
-    flex-direction: column;
+.sidebar {
+    background:#020617;
+    padding:20px;
 }
 
-h1 {
-    margin-bottom: 15px;
+.main {
+    padding:30px;
+}
+
+.card {
+    background:#111827;
+    padding:20px;
+    border-radius:15px;
+    margin-bottom:20px;
 }
 
 input, select {
-    width: 100%;
-    padding: 10px;
-    margin: 8px 0 12px;
-    border-radius: 10px;
-    border: none;
-    outline: none;
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border-radius:8px;
+    border:none;
 }
 
 button {
-    padding: 12px;
-    border-radius: 12px;
-    border: none;
-    background: linear-gradient(135deg, #00c6ff, #0072ff);
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-button:hover {
-    transform: scale(1.05);
-}
-
-/* RIGHT SIDE */
-.output-box {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-/* Cards */
-.card {
-    background: rgba(0,0,0,0.4);
-    padding: 15px;
-    border-radius: 15px;
+    width:100%;
+    padding:12px;
+    background:#2563eb;
+    color:white;
+    border:none;
+    border-radius:10px;
 }
 
 /* Progress bars */
 .bar {
-    height: 10px;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.2);
-    margin-top: 5px;
+    background:#333;
+    height:10px;
+    border-radius:10px;
+    margin-bottom:10px;
 }
 
 .fill {
-    height: 100%;
-    border-radius: 10px;
-    background: linear-gradient(90deg, #00c6ff, #0072ff);
+    height:10px;
+    background:#3b82f6;
+    border-radius:10px;
 }
 
-/* AI Chat box */
-.ai-box {
-    background: rgba(0,0,0,0.6);
-    padding: 15px;
-    border-radius: 15px;
-    max-height: 250px;
-    overflow-y: auto;
-    white-space: pre-wrap;
-}
-
-/* Toggle */
-.toggle {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    cursor: pointer;
-    padding: 8px 12px;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.2);
-}
-
-/* Responsive */
-@media(max-width: 900px) {
-    .container {
-        grid-template-columns: 1fr;
-        width: 95%;
-    }
+/* Chat */
+.chat {
+    background:#020617;
+    padding:15px;
+    border-radius:10px;
+    height:200px;
+    overflow:auto;
+    white-space:pre-wrap;
 }
 </style>
 </head>
 
 <body>
 
-<div class="toggle" onclick="toggleMode()">🌙 Toggle</div>
-
 <div class="container">
 
-<!-- LEFT -->
-<div class="form-box">
-    <h1>💪 AI Fitness Pro</h1>
+<div class="sidebar">
+<h2>AI Fitness</h2>
 
-    <form method="POST">
+<form method="POST">
+<input name="age" placeholder="Age" required>
+<input name="weight" placeholder="Weight" required>
 
-        <input type="number" name="age" placeholder="Age" required>
+<select name="weight_unit">
+<option value="kg">kg</option>
+<option value="pounds">pounds</option>
+</select>
 
-        <input type="number" step="any" name="weight" placeholder="Weight" required>
-        <select name="weight_unit">
-            <option value="kg">kg</option>
-            <option value="pounds">pounds</option>
-        </select>
+<input name="height" placeholder="Height" required>
 
-        <input type="number" step="any" name="height" placeholder="Height" required>
-        <select name="height_unit">
-            <option value="cm">cm</option>
-            <option value="feet">feet</option>
-            <option value="m">meters</option>
-        </select>
+<select name="height_unit">
+<option value="cm">cm</option>
+<option value="feet">feet</option>
+<option value="m">meters</option>
+</select>
 
-        <select name="gender">
-            <option>Male</option>
-            <option>Female</option>
-        </select>
+<select name="gender">
+<option>Male</option>
+<option>Female</option>
+</select>
 
-        <select name="activity">
-            <option>Lazy</option>
-            <option>Normal</option>
-            <option>Active</option>
-        </select>
+<select name="activity">
+<option>Lazy</option>
+<option>Normal</option>
+<option>Active</option>
+</select>
 
-        <select name="goal">
-            <option value="weight_loss">Weight Loss</option>
-            <option value="weight_gain">Weight Gain</option>
-            <option value="maintain">Maintain</option>
-        </select>
+<select name="goal">
+<option value="weight_loss">Weight Loss</option>
+<option value="weight_gain">Weight Gain</option>
+<option value="maintain">Maintain</option>
+</select>
 
-        <button type="submit">⚡ Generate Plan</button>
-    </form>
+<button type="submit">Generate</button>
+</form>
 </div>
 
-<!-- RIGHT -->
-<div class="output-box">
+<div class="main">
 
 {% if BMI %}
 <div class="card">
-    <h3>📊 Stats</h3>
-    <p>BMI: {{ BMI }}</p>
-    <p>Status: {{ status }}</p>
-    <p>Calories: {{ calories }}</p>
+<h3>Stats</h3>
+<p>BMI: {{ BMI }}</p>
+<p>Status: {{ status }}</p>
+<p>Calories: {{ calories }}</p>
+</div>
+
+{% set total = protein + fat + carbs %}
+
+<div class="card">
+<h3>Macros</h3>
+
+<p>Protein {{ protein }}g</p>
+<div class="bar"><div class="fill" style="width: {{ (protein/total)*100 }}%"></div></div>
+
+<p>Fat {{ fat }}g</p>
+<div class="bar"><div class="fill" style="width: {{ (fat/total)*100 }}%"></div></div>
+
+<p>Carbs {{ carbs }}g</p>
+<div class="bar"><div class="fill" style="width: {{ (carbs/total)*100 }}%"></div></div>
 </div>
 
 <div class="card">
-    <h3>🍗 Macros</h3>
-
-    <p>Protein ({{ protein }}g)</p>
-    <div class="bar"><div class="fill" style="width: {{ protein/2 }}%"></div></div>
-
-    <p>Fat ({{ fat }}g)</p>
-    <div class="bar"><div class="fill" style="width: {{ fat/2 }}%"></div></div>
-
-    <p>Carbs ({{ carbs }}g)</p>
-    <div class="bar"><div class="fill" style="width: {{ carbs/3 }}%"></div></div>
+<canvas id="chart"></canvas>
 </div>
 {% endif %}
 
 {% if ai_plan %}
-<div class="ai-box">
-    🤖 {{ ai_plan }}
+<div class="card">
+<h3>AI Plan</h3>
+<div id="chat" class="chat"></div>
 </div>
 {% endif %}
 
@@ -217,9 +166,34 @@ button:hover {
 </div>
 
 <script>
-function toggleMode() {
-    document.body.classList.toggle("dark");
+// chart
+{% if chart_data %}
+let data = {{ chart_data|safe }};
+new Chart(document.getElementById("chart"), {
+    type: "doughnut",
+    data: {
+        labels: ["Protein","Fat","Carbs"],
+        datasets: [{
+            data: [data.protein, data.fat, data.carbs]
+        }]
+    }
+});
+{% endif %}
+
+// typing effect
+{% if ai_plan %}
+let text = `{{ ai_plan }}`;
+let i = 0;
+
+function type() {
+    if (i < text.length) {
+        document.getElementById("chat").innerHTML += text.charAt(i);
+        i++;
+        setTimeout(type, 15);
+    }
 }
+type();
+{% endif %}
 </script>
 
 </body>
