@@ -1,42 +1,85 @@
-<h2>Nutrition Calculator</h2>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nutrition Calculator</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #0f172a;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
 
-<form action="/result" method="POST">
+        .box {
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 15px;
+            width: 400px;
+        }
 
-Age: <input name="age"><br><br>
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+            border: none;
+        }
 
-Weight: <input name="weight">
-<select name="w_unit">
-<option value="kg">Kg</option>
-<option value="pound">Pound</option>
-</select><br><br>
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #38bdf8;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+    </style>
+</head>
 
-Height: <input name="height">
-<select name="h_unit">
-<option value="cm">Cm</option>
-<option value="f">Feet</option>
-<option value="m">Meter</option>
-</select><br><br>
+<body>
 
-Gender:
-<select name="gender">
-<option value="male">Male</option>
-<option value="female">Female</option>
-</select><br><br>
+<div class="box">
+    <h2>Nutrition Calculator</h2>
 
-Activity:
-<select name="activity">
-<option value="lazy">Lazy</option>
-<option value="normal">Normal</option>
-<option value="active">Active</option>
-</select><br><br>
+    <form method="POST">
+        <input name="age" placeholder="Age" required>
+        <input name="weight" placeholder="Weight" required>
 
-Goal:
-<select name="goal">
-<option value="loss">Weight Loss</option>
-<option value="gain">Weight Gain</option>
-<option value="maintain">Maintain</option>
-</select><br><br>
+        <select name="weight_unit">
+            <option value="kg">Kg</option>
+            <option value="pounds">Pounds</option>
+        </select>
 
-<button type="submit">Calculate</button>
+        <input name="height" placeholder="Height" required>
 
-</form>
+        <select name="height_unit">
+            <option value="cm">Cm</option>
+            <option value="feet">Feet</option>
+        </select>
+
+        <select name="gender">
+            <option>Male</option>
+            <option>Female</option>
+        </select>
+
+        <select name="activity">
+            <option>Lazy</option>
+            <option>Normal</option>
+            <option>Active</option>
+        </select>
+
+        <select name="goal">
+            <option value="weight_loss">Weight Loss</option>
+            <option value="weight_gain">Weight Gain</option>
+            <option value="weight_maintain">Maintain</option>
+        </select>
+
+        <button type="submit">Calculate</button>
+    </form>
+</div>
+
+</body>
+</html>
