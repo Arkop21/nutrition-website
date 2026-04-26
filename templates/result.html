@@ -1,11 +1,30 @@
-<h2>Your Results</h2>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Plan</title>
+</head>
 
-<p>BMI: {{ BMI }}</p>
-<p>Status: {{ status }}</p>
-<p>BMR: {{ BMR }}</p>
-<p>TDEE: {{ TDEE }}</p>
+<body style="margin:0; font-family:Arial; background:#020617; color:white; padding:30px;">
 
-<hr>
+<div style="max-width:700px; margin:auto;">
 
-<h3>AI Diet Plan</h3>
-<pre>{{ diet }}</pre>
+    <h2>📊 Your Results</h2>
+
+    <div style="background:#111827; padding:20px; border-radius:15px;">
+        <p><b>BMI:</b> {{ BMI }}</p>
+        <p><b>Status:</b> {{ status }}</p>
+        <p><b>BMR:</b> {{ BMR }}</p>
+        <p><b>TDEE:</b> {{ TDEE }}</p>
+    </div>
+
+    <br>
+
+    <div style="background:#111827; padding:20px; border-radius:15px;">
+        <h3>🍽 AI Diet Plan</h3>
+        <pre style="white-space:pre-wrap;">{{ diet }}</pre>
+    </div>
+
+</div>
+
+</body>
+</html>
