@@ -1,3 +1,8 @@
+from openai import OpenAI
+client=
+OpenAI(api_key="YOUR_API_KEY")
+
+
 from flask import Flask, render_template, request
 
 app = Flask(__name__)
@@ -111,25 +116,29 @@ def home():
             age, weight_kg, cm_height, gender, activity, goal
         )
 
-        diet_plan = generate_diet_plan(Cal, Prot, Fat, Carbs, goal)
+       def generate_diet_plan(BMI, goal, Cal, Prot, Fat, Carbs):
 
-        return render_template(
-            "result.html",
-            BMI=BMI,
-            r_BMI=r_BMI,
-            r_BMR=r_BMR,
-            TDEE=TDEE,
-            Cal=Cal,
-            Prot=Prot,
-            Fat=Fat,
-            Carbs=Carbs,
-            diet_plan=diet_plan
-        )
+    prompt = f"""
+You are a professional nutritionist.
 
-    return render_template("index.html")
+Create a simple diet plan:
 
+BMI: {BMI}
+Goal: {goal}
+Calories: {Cal}
+Protein: {Prot}
+Fat: {Fat}
+Carbs: {Carbs}
 
-# ---------------- RUN APP ----------------
+Make it simple and practical for Pakistan food.
+"""
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "You are a nutrition expert."},
+            {"role": "user", "content": prompt}
+        ]
+    )
+
+    return response.choices[0].message.content
