@@ -1,0 +1,42 @@
+<h2>Nutrition Calculator</h2>
+
+<form action="/result" method="POST">
+
+Age: <input name="age"><br><br>
+
+Weight: <input name="weight">
+<select name="w_unit">
+<option value="kg">Kg</option>
+<option value="pound">Pound</option>
+</select><br><br>
+
+Height: <input name="height">
+<select name="h_unit">
+<option value="cm">Cm</option>
+<option value="f">Feet</option>
+<option value="m">Meter</option>
+</select><br><br>
+
+Gender:
+<select name="gender">
+<option value="male">Male</option>
+<option value="female">Female</option>
+</select><br><br>
+
+Activity:
+<select name="activity">
+<option value="lazy">Lazy</option>
+<option value="normal">Normal</option>
+<option value="active">Active</option>
+</select><br><br>
+
+Goal:
+<select name="goal">
+<option value="loss">Weight Loss</option>
+<option value="gain">Weight Gain</option>
+<option value="maintain">Maintain</option>
+</select><br><br>
+
+<button type="submit">Calculate</button>
+
+</form>
